@@ -1,0 +1,25 @@
+services:
+  app-java:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db-postgres
+    environment:
+      # Cấu hình kết nối PostgreSQL cho Spring Boot
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-postgres:5432/demo_docker_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: demo1234
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+
+  db-postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: demo1234
+      POSTGRES_DB: demo_docker_db
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:
