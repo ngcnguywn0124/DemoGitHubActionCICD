@@ -21,15 +21,22 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4.0.0
         
-      - name: Build and push Image
-        uses: docker/build-push-action@v7.0.0
-        with:
-          context: .
-          push: true
-          # Chúng ta sẽ đẩy lên 2 tag cùng lúc: 
-          # 1. 'latest' để luôn là bản mới nhất
-          # 2. 'v1.0.x' với x là số lần chạy workflow (tự tăng)
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/my-app:latest
-            ${{ secrets.DOCKER_USERNAME }}/my-app:v1.0.${{ github.run_number }}
+      - name: Triển khai lên DevOps Classroom
+        run: |
+          REPO="repository/docker"
+          RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${{ secrets.DEPLOY_URL }}?repo=$REPO&tag=latest")
+          BODY=$(echo "$RESPONSE" | sed "$d")
+          CODE=$(echo "$RESPONSE" | tail -n1)
+          echo "Webhook HTTP: $CODE"
+          if [ "$CODE" -lt 200 ] || [ "$CODE" -ge 300 ]; then
+            echo "Deploy thất bại. Xem chi tiết trong nhóm log bên dưới."
+            echo "::group::Chi tiết webhook JSON"
+            echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+            echo "::endgroup::"
+            exit 1
+          fi
+          echo "Deploy thành công."
+          echo "::group::Chi tiết webhook JSON"
+          echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+          echo "::endgroup::"
   
