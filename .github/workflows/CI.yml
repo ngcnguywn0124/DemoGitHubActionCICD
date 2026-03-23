@@ -23,7 +23,7 @@ jobs:
         
       - name: Triển khai lên DevOps Classroom
         run: |
-          REPO="repository/docker"
+          REPO="sadmesuyy/my-app"
           RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${{ secrets.DEPLOY_URL }}?repo=$REPO&tag=latest")
           BODY=$(echo "$RESPONSE" | sed "$d")
           CODE=$(echo "$RESPONSE" | tail -n1)
@@ -39,4 +39,3 @@ jobs:
           echo "::group::Chi tiết webhook JSON"
           echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
           echo "::endgroup::"
-  
